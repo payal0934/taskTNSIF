@@ -1,0 +1,91 @@
+// Product.java
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
+public class Product {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String description;
+    private double price;
+
+    // Constructors, getters, setters...
+}
+
+// ProductRepository.java
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ProductRepository extends JpaRepository<Product, Long> {
+}
+
+// ProductService.java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class ProductService {
+    @Autowired
+    private ProductRepository productRepository;
+
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+
+    public Optional<Product> getProductById(Long id) {
+        return productRepository.findById(id);
+    }
+
+    public Product saveProduct(Product product) {
+        return productRepository.save(product);
+    }
+
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
+    }
+}
+
+// ProductController.java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/products")
+public class ProductController {
+    @Autowired
+    private ProductService productService;
+
+    @GetMapping
+    public List<Product> getAllProducts() {
+        return productService.getAllProducts();
+    }
+
+    @GetMapping("/{id}")
+    public Optional<Product> getProductById(@PathVariable Long id) {
+        return productService.getProductById(id);
+    }
+
+    @PostMapping
+    public Product createProduct(@RequestBody Product product) {
+        return productService.saveProduct(product);
+    }
+
+    @PutMapping("/{id}")
+    public Product updateProduct(@PathVariable Long id, @RequestBody Product product) {
+        product.setId(id);
+        return productService.saveProduct(product);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+    }
+}
